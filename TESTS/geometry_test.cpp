@@ -2,7 +2,7 @@
 
 using namespace xrg;
 
-void test_intersect(xrt::XRay* ray, Body* body, int exp_numroots, double* expected_roots)
+void test_intersect(xrt::Photon* ray, Body* body, int exp_numroots, double* expected_roots)
 {
     double intersections[2] = {0, 0};
     int numint = 0;
@@ -32,8 +32,8 @@ int main(int argc, const char* argv[])
         xru::Point3D o = xru::Point3D(0, 0, 0);
         xru::Vector3D d = xru::Vector3D(1, 0, 0);
         d.norm();
-        xrt::XRay* xrx = new xrt::XRay(d);
-        xrt::XRay::set_source(o);
+        xrt::Photon* xrx = new xrt::Photon(d);
+        xrt::Photon::set_source(o);
 
         Body* bodies[] = {sph, sph_behind, ell, ell_behind};
         int exp_numroots[] = {2, 0, 2, 0};
@@ -50,7 +50,7 @@ int main(int argc, const char* argv[])
         Body* cyl = new Cylinder(1,2, 2,0,0);
         Body* cyl_z = new Cylinder(1,2, 0,0,2);
         Body* cyl_behind = new Cylinder(1,2, 0,0,-2);
-        xrt::XRay* xrz = new xrt::XRay(xru::Vector3D(0,0,1));
+        xrt::Photon* xrz = new xrt::Photon(xru::Vector3D(0,0,1));
 
         double exp_roots_cyl[2];
 
@@ -73,7 +73,7 @@ int main(int argc, const char* argv[])
         test_intersect(xrz, cyl_behind, 0, exp_roots_cyl);
         std::cout << std::endl;
 
-        xrt::XRay* xr_angle = new xrt::XRay(xru::Vector3D(0.5, 0, 1));
+        xrt::Photon* xr_angle = new xrt::Photon(xru::Vector3D(0.5, 0, 1));
         std::cout << "----Using ray: " << xr_angle->direction_ << "----" << std::endl;
         exp_roots_cyl[0] = 1;
         exp_roots_cyl[1] = 2;

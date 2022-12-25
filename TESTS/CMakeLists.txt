@@ -1,9 +1,6 @@
 # Adding test executables.
 list(APPEND tests
      utilities_test.cpp
-     logic_test.cpp
-     tube_test.cpp
-     tube_test2.cpp
      geometry_test.cpp
     )
 

@@ -5,7 +5,7 @@ using namespace xrg;
 
 Body::Body(const double x, const double y, const double z, int material): centre_(x, y, z), material_(material) { };
 
-xru::QuadraticCoef *xrg::Body::intersect_coefs(const xrt::XRay &ray) const
+xru::QuadraticCoef *xrg::Body::intersect_coefs(const xrt::Photon &ray) const
 {
     return nullptr;
 }
@@ -28,13 +28,13 @@ Ellipsoid::Ellipsoid(const double a, const double b, const double c, const doubl
     assert((c_ != 0));
 }
 
-void xrg::Ellipsoid::intersect(const xrt::XRay &ray, double *intersections, int& numintersections) const
+void xrg::Ellipsoid::intersect(const xrt::Photon &ray, double *intersections, int& numintersections) const
 {
     xru::QuadraticCoef* qc = intersect_coefs(ray);
     xru::QuadraticSolver(*qc, intersections, numintersections);
 }
 
-xru::QuadraticCoef *Ellipsoid::intersect_coefs(const xrt::XRay &ray) const
+xru::QuadraticCoef *Ellipsoid::intersect_coefs(const xrt::Photon &ray) const
 {
     // Assuming this is non-zero:
     auto divider = 1 / ((ray.direction_.dz/c_)*(ray.direction_.dz/c_) +
@@ -42,13 +42,13 @@ xru::QuadraticCoef *Ellipsoid::intersect_coefs(const xrt::XRay &ray) const
                         (ray.direction_.dx/a_)*(ray.direction_.dx/a_));
 
     xru::QuadraticCoef* qc = new xru::QuadraticCoef();
-    qc->q = ( (xrt::XRay::source_.dz - centre_.dz)*(xrt::XRay::source_.dz - centre_.dz) / (c_*c_) +
-              (xrt::XRay::source_.dy - centre_.dy)*(xrt::XRay::source_.dy - centre_.dy) / (b_*b_) +
-              (xrt::XRay::source_.dx - centre_.dx)*(xrt::XRay::source_.dx - centre_.dx) / (a_*a_) -
+    qc->q = ( (xrt::Photon::source_.dz - centre_.dz)*(xrt::Photon::source_.dz - centre_.dz) / (c_*c_) +
+              (xrt::Photon::source_.dy - centre_.dy)*(xrt::Photon::source_.dy - centre_.dy) / (b_*b_) +
+              (xrt::Photon::source_.dx - centre_.dx)*(xrt::Photon::source_.dx - centre_.dx) / (a_*a_) -
               1 )* divider;
-    qc->phalf = ( ((xrt::XRay::source_.dz-centre_.dz)*ray.direction_.dz/(c_*c_)) +
-                  ((xrt::XRay::source_.dy-centre_.dy)*ray.direction_.dy/(b_*b_)) +
-                  ((xrt::XRay::source_.dx-centre_.dx)*ray.direction_.dx/(a_*a_)) ) * divider;
+    qc->phalf = ( ((xrt::Photon::source_.dz-centre_.dz)*ray.direction_.dz/(c_*c_)) +
+                  ((xrt::Photon::source_.dy-centre_.dy)*ray.direction_.dy/(b_*b_)) +
+                  ((xrt::Photon::source_.dx-centre_.dx)*ray.direction_.dx/(a_*a_)) ) * divider;
 
     return qc;
 }
@@ -62,16 +62,16 @@ void xrg::Ellipsoid::print(std::ostream &where) const
 Sphere::Sphere(const double r, const double x, const double y, const double z):
     r_(r), Body(x, y, z) { };
 
-void xrg::Sphere::intersect(const xrt::XRay &ray, double *intersections, int& numintersections) const
+void xrg::Sphere::intersect(const xrt::Photon &ray, double *intersections, int& numintersections) const
 {
     xru::QuadraticCoef* qc = intersect_coefs(ray);
     xru::QuadraticSolver(*qc, intersections, numintersections);
 }
 
-xru::QuadraticCoef *Sphere::intersect_coefs(const xrt::XRay &ray) const
+xru::QuadraticCoef *Sphere::intersect_coefs(const xrt::Photon &ray) const
 {
     // Assume line's direction vector is normalized and non-zero
-    auto delta = xrt::XRay::source_ - centre_;
+    auto delta = xrt::Photon::source_ - centre_;
 
     xru::QuadraticCoef* qc = new xru::QuadraticCoef();
     qc->q = delta.dot(delta) - r_*r_;
@@ -88,7 +88,7 @@ void xrg::Sphere::print(std::ostream &where) const
 
 Cylinder::Cylinder(const double r, const double h, const double x, const double y, const double z): Body(x, y, z), h_(h), r_(r) { };
 
-void xrg::Cylinder::intersect(const xrt::XRay &ray, double *intersections, int& numintersections) const
+void xrg::Cylinder::intersect(const xrt::Photon &ray, double *intersections, int& numintersections) const
 {
     bool intersects_planar_face = false;
     enum {UPPER = 1, LOWER = -1};
@@ -102,8 +102,8 @@ void xrg::Cylinder::intersect(const xrt::XRay &ray, double *intersections, int& 
     xru::QuadraticSolver(*qc, roots, numroots);
 
     for(int i = 0; i < numroots; i++)
-        if ((ray.direction_.dz*roots[i] + xrt::XRay::source_.dz > centre_.dz - h_*0.5 - xrc::tolerance) &&
-            (ray.direction_.dz*roots[i] + xrt::XRay::source_.dz < centre_.dz + h_*0.5 + xrc::tolerance))
+        if ((ray.direction_.dz*roots[i] + xrt::Photon::source_.dz > centre_.dz - h_*0.5 - xrc::tolerance) &&
+            (ray.direction_.dz*roots[i] + xrt::Photon::source_.dz < centre_.dz + h_*0.5 + xrc::tolerance))
             {
                 intersections[i] = roots[i];
                 numintersections++;
@@ -120,7 +120,7 @@ void xrg::Cylinder::intersect(const xrt::XRay &ray, double *intersections, int& 
     }
 }
 
-xru::QuadraticCoef *Cylinder::intersect_coefs(const xrt::XRay &ray) const
+xru::QuadraticCoef *Cylinder::intersect_coefs(const xrt::Photon &ray) const
 {
     // Cylinder is always along z-axis, so this is checking circle
     xru::Vector3D ray_projection = xru::Vector3D(ray.direction_.dx, ray.direction_.dy, 0);
@@ -129,20 +129,20 @@ xru::QuadraticCoef *Cylinder::intersect_coefs(const xrt::XRay &ray) const
     double divider = ray_projection.dot(ray_projection);
     divider = 1/divider;
 
-    qc->phalf = (ray_projection.dot(xrt::XRay::source_) - ray_projection.dot(centre_)) * divider;
-    qc->q = ((xrt::XRay::source_.dx - centre_.dx) * (xrt::XRay::source_.dx - centre_.dx) + 
-             (xrt::XRay::source_.dy - centre_.dy) * (xrt::XRay::source_.dy - centre_.dy)
+    qc->phalf = (ray_projection.dot(xrt::Photon::source_) - ray_projection.dot(centre_)) * divider;
+    qc->q = ((xrt::Photon::source_.dx - centre_.dx) * (xrt::Photon::source_.dx - centre_.dx) + 
+             (xrt::Photon::source_.dy - centre_.dy) * (xrt::Photon::source_.dy - centre_.dy)
              - r_*r_) * divider;
 
     return qc;
 }
 
-bool xrg::Cylinder::planar_face_intersect(const xrt::XRay &ray, double *intersections, int &numintersections, const int side) const
+bool xrg::Cylinder::planar_face_intersect(const xrt::Photon &ray, double *intersections, int &numintersections, const int side) const
 {
     xru::Vector3D face_normal = xru::Vector3D(0, 0, 1) * side;
     xru::Vector3D face_centre = xru::Vector3D(0, 0, h_*0.5) * side + centre_;
 
-    double d = (face_centre - xrt::XRay::source_).dot(face_normal) / ray.direction_.dot(face_normal);
+    double d = (face_centre - xrt::Photon::source_).dot(face_normal) / ray.direction_.dot(face_normal);
     if (d < 0) return false;
 
     if ((ray.direction_*d - face_centre).dot(ray.direction_*d - face_centre) < r_*r_)

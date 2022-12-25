@@ -7,8 +7,8 @@ namespace xrg {
         public:
         Body(const double x, const double y, const double z, int material = xrc::materials::VACUUM);
 
-        virtual void intersect(const xrt::XRay &ray, double* intersections, int& numintersections) const = 0;
-        virtual xru::QuadraticCoef* intersect_coefs(const xrt::XRay &ray) const = 0;
+        virtual void intersect(const xrt::Photon &ray, double* intersections, int& numintersections) const = 0;
+        virtual xru::QuadraticCoef* intersect_coefs(const xrt::Photon &ray) const = 0;
         virtual void print(std::ostream& where) const;
 
         void set_material(const int material);
@@ -25,8 +25,8 @@ namespace xrg {
         public:
         Ellipsoid(const double a, const double b, const double c, const double x, const double y, const double z);
 
-        virtual void intersect(const xrt::XRay &ray, double* intersections, int& numintersections) const override;
-        virtual xru::QuadraticCoef* intersect_coefs(const xrt::XRay &ray) const override;
+        virtual void intersect(const xrt::Photon &ray, double* intersections, int& numintersections) const override;
+        virtual xru::QuadraticCoef* intersect_coefs(const xrt::Photon &ray) const override;
 
         virtual void print(std::ostream& where) const override;
 
@@ -38,8 +38,8 @@ namespace xrg {
         public:
         Sphere(const double r, const double x, const double y, const double z);
 
-        virtual void intersect(const xrt::XRay &ray, double* intersections, int& numintersections) const override;
-        virtual xru::QuadraticCoef* intersect_coefs(const xrt::XRay &ray) const override;
+        virtual void intersect(const xrt::Photon &ray, double* intersections, int& numintersections) const override;
+        virtual xru::QuadraticCoef* intersect_coefs(const xrt::Photon &ray) const override;
 
         virtual void print(std::ostream& where) const override;
 
@@ -51,9 +51,9 @@ namespace xrg {
         public:
         Cylinder(const double r, const double h, const double x, const double y, const double z);
 
-        virtual void intersect(const xrt::XRay &ray, double* intersections, int& numintersections) const override;
-        virtual xru::QuadraticCoef* intersect_coefs(const xrt::XRay &ray) const override;
-        bool planar_face_intersect(const xrt::XRay &ray, double* intersections, int& numintersections, const int side) const;
+        virtual void intersect(const xrt::Photon &ray, double* intersections, int& numintersections) const override;
+        virtual xru::QuadraticCoef* intersect_coefs(const xrt::Photon &ray) const override;
+        bool planar_face_intersect(const xrt::Photon &ray, double* intersections, int& numintersections, const int side) const;
 
         virtual void print(std::ostream& where) const override;
 
