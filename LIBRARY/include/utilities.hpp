@@ -43,6 +43,24 @@ namespace xru
 
     void QuadraticSolver(const QuadraticCoef &coef, double *roots, int &numroots);
 
+
+    int index_finder(double element_value, const std::vector<double>& container);
+
+
+    struct RandomGenerator {
+        static void initialize_random_generator();
+
+        static double random_scalar();
+        static double random_positive();
+        static double random_range(const double min, const double max);
+
+        static const double max_inverse;
+        
+        private:
+        RandomGenerator();
+        static bool is_initialized;
+    }
+
 }
 
 #endif

@@ -3,6 +3,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <list>
@@ -15,6 +18,7 @@
 
 #include "constants.hpp"
 #include "utilities.hpp"
+#include "photons.hpp"
 #include "geometry.hpp"
 
 #endif

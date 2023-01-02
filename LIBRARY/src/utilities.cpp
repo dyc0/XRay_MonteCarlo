@@ -1,4 +1,5 @@
 #include "XRaySimulator.hpp"
+#include "utilities.hpp"
 
 namespace xru {
 
@@ -88,4 +89,40 @@ namespace xru {
         numroots += (roots[numroots] > xrc::tolerance);
     }
 
+    int index_finder(double element_value, const std::vector<double>& container)
+    {
+        for (int i=0; i < container.size(); i++)
+            if (element_value <= container[i]) return i;
+        return -1;
+    }
+
+    bool RandomGenerator::is_initialized = false;
+    const double RandomGenerator::max_inverse = 1./RAND_MAX;
+
+    RandomGenerator::RandomGenerator()
+    {
+        std::srand(std::time(nullptr));
+        is_initialized = true;
+    }
+
+    void RandomGenerator::initialize_random_generator()
+    {
+        if (!is_initialized)
+            RandomGenerator();
+    }
+
+    inline double xru::RandomGenerator::random_scalar()
+    {
+        return rand() * max_inverse - 1.;
+    }
+
+    inline double RandomGenerator::random_positive()
+    {
+        return rand() * max_inverse;
+    }
+
+    inline double RandomGenerator::random_range(const double min, const double max)
+    {
+        return rand() * max_inverse * (max - min) + min;
+    }
 }

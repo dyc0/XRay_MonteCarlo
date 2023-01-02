@@ -1,7 +1,7 @@
 from material_generator import read_attenuation
 from spectra_converter import read_spectrum
 
-import getopt
+from matplotlib import pyplot as plt
 import numpy as np
 import os
 import string
@@ -53,38 +53,7 @@ if __name__ == '__main__':
     tolerance = "1e-6"
     output_file = "../LIBRARY/include/constants.hpp"
 
-    mAs = 100
-    surface = 0.1*0.2
-    
-    try:
-        arguments, values = getopt.getopt(argument_list, options, long_options)
-        for curArg, curVal in arguments:
-            if curArg in ("-k", "--kvp"):
-                tube_kvp = curVal
-            elif curArg in ("-d", "--deg"):
-                tube_deg = curVal
-            elif curArg in ("-f", "--filter"):
-                tube_flt = curVal
-            elif curArg in ("-s", "--SpectrumPath"):
-                spectrum_path = curVal
-            elif curArg in ("-m", "--MaterialsPath"):
-                materials_path = curVal
-            elif curArg in ("-t", "--Tolerance"):
-                tolerance = curVal
-            elif curArg in ("-o", "--OutputFile"):
-                output_file = curVal
-
-    except getopt.error as err:
-        print(str(err))
-
-    spectrum_filename = os.path.join(spectrum_path, "SPECTRA_" + tube_kvp + "kVp_" + \
-        tube_deg + "deg_" + tube_flt + ".txt")
-    energies, photons = read_spectrum(spectrum_filename)
-
-    # Normalization for 12-bit
-    maxphotons = np.sum(photons)
-    maxconst = 2**12-1
-    for i in range(len(photons)): photons[i] = photons[i]/maxphotons * maxconst
+    energies = np.arange(6, 120.5, 0.5)
 
     materials = {}
     energies_MeV = [e*0.001 for e in energies]
@@ -103,9 +72,44 @@ if __name__ == '__main__':
         of.write(source_e)
         of.write("\n\n")
 
-        #for i in range(len(photons)): photons[i] = photons[i] * energies[i] * mAs * surface
-        source_s = get_list(photons, "spectrum", "double", "Photon count per energy value")
-        of.write(source_s)
+        spectra_enum_names = []
+        spectra_pointers = []
+        for kvp in ['60', '120']:
+            for filt in ['1Al', '3Al']:
+                spectrum_filename = os.path.join(spectrum_path, "SPECTRA_" + kvp + "kVp_" + \
+                "17deg_" + filt + ".txt")
+
+                src_energies, photons = read_spectrum(spectrum_filename)
+                # Normalization
+                maxphotons = np.sum(photons)
+                for i in range(len(photons)): photons[i] = 1.*photons[i]/maxphotons
+
+                photons_tailed = []
+                
+                for eng in energies:
+                    cnt = 0
+                    if eng not in src_energies:
+                        photons_tailed.append(0)
+                    else:
+                        i = src_energies.index(eng)
+                        photons_tailed.append(photons[i])
+
+                photons_tailed = np.cumsum(photons_tailed)
+
+                spectra_enum_names.append('kVp_' + kvp + "_" + filt)
+                spectra_pointers.append("&" + "spectrum_" + kvp + "kVp_" + filt)
+                source_s = get_list(photons_tailed, "spectrum_" + kvp + "kVp_" + filt, "double", "Photon count per energy value")
+                of.write(source_s)
+                of.write("\n")
+
+        spectra_enum = "enum spectra { "
+        for key in spectra_enum_names:
+            spectra_enum += key.upper() + ", "
+        spectra_enum = spectra_enum[:-2]
+        spectra_enum += " };"
+
+        spectra_map = get_map(np.arange(0, len(spectra_pointers)), spectra_pointers, "spectra_keys", "int", "const std::vector<double>*", "Map of all spectra")
+        of.write(spectra_map)
         of.write("\n\n")
 
         keys_pointers = []
@@ -125,6 +129,8 @@ if __name__ == '__main__':
         densities = [1.050, 9.500e-01, 1.050, 1.040, 1.070, 1.040, 1.920, 1.060, 1.050, 1.020, 1]
         densities_str = get_list(densities, "material_densities", "double", "Densities of materials")
         of.write("\n" + densities_str)
+
+        of.write("\n\t" + spectra_enum + "\n")
 
         of.write("\n\t" + materials_enum + "\n")
         of.write("\n")
