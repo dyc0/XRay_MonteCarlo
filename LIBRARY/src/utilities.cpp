@@ -96,32 +96,38 @@ namespace xru {
         return -1;
     }
 
-    bool RandomGenerator::is_initialized = false;
+    RandomGenerator* RandomGenerator::instance_ = nullptr;
     const double RandomGenerator::max_inverse = 1./RAND_MAX;
 
     RandomGenerator::RandomGenerator()
     {
         std::srand(std::time(nullptr));
-        is_initialized = true;
+        instance_ = this;
     }
 
-    void RandomGenerator::initialize_random_generator()
+    RandomGenerator* RandomGenerator::initialize_random_generator()
     {
-        if (!is_initialized)
-            RandomGenerator();
+        if (instance_ == nullptr)
+            return new RandomGenerator();
+        else return instance_;
     }
 
-    inline double xru::RandomGenerator::random_scalar()
+    RandomGenerator::~RandomGenerator()
     {
-        return rand() * max_inverse - 1.;
+        RandomGenerator::instance_ = nullptr;
     }
 
-    inline double RandomGenerator::random_positive()
+    double xru::RandomGenerator::random_scalar()
+    {
+        return rand() * max_inverse * 2 - 1.;
+    }
+
+    double RandomGenerator::random_positive()
     {
         return rand() * max_inverse;
     }
 
-    inline double RandomGenerator::random_range(const double min, const double max)
+    double RandomGenerator::random_range(const double min, const double max)
     {
         return rand() * max_inverse * (max - min) + min;
     }

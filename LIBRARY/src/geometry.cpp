@@ -1,6 +1,6 @@
 #include "XRaySimulator.hpp"
 #include "geometry.hpp"
-
+/*
 using namespace xrg;
 
 Body::Body(const double x, const double y, const double z, int material): centre_(x, y, z), material_(material) { };
@@ -166,3 +166,4 @@ std::ostream &xrg::operator<<(std::ostream &out, const Body &o)
     o.print(out);
     return out;
 }
+*/

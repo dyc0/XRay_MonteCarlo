@@ -20,7 +20,7 @@ int main()
 
     cout << "Generating vector" << endl;
     vector<double> vrec;
-    for (int i=0; i<1e9; i++)
+    for (int i=0; i<1e7; i++)
         vrec.push_back(rand());
 
     cout << "Sorting vector" << endl;

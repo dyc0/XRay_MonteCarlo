@@ -1,6 +1,6 @@
 #ifndef GEOMETRY_HPP
 #define GEOMETRY_HPP
-
+/*
 namespace xrg {
 
     class Body {
@@ -62,7 +62,7 @@ namespace xrg {
     };
 
 }
-
+*/
 
 
 #endif

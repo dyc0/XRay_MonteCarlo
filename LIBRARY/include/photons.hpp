@@ -7,6 +7,7 @@ namespace xrp
     struct Photon
     {
         Photon(const xru::Point3D& origin, const xru::Vector3D& direction, const float energy, const int lerp_energy_index, const float lerp_percentage);
+        ~Photon() = default;
 
         float energy_;
         xru::Vector3D direction_;
@@ -17,39 +18,47 @@ namespace xrp
         float lerp_percentage_;
     };
 
+    std::ostream& operator<<(std::ostream& out, const Photon& p);
+
     class Source
     {
         protected:
-        Source(xru::Point3D origin, const int spectrum);
+        Source(const xru::Point3D& origin, const int spectrum);
         static Source* source_;
 
         xru::Vector3D generate_random_vector() const;
         void generate_energy(int& index, double& lerp_perc, float& energy) const;
 
         public:
+        ~Source();
         virtual Photon* generate_particle() const = 0;
 
         const std::vector<double>* spectrum_;
         xru::Point3D origin_;
+
+        private:
+        xru::RandomGenerator* rng_;
     };
 
     class PointSource : public Source
     {
         private:
-        PointSource(xru::Point3D origin, const int spectrum);
+        PointSource(const xru::Point3D& origin, const int spectrum);
 
         public:
-        PointSource* create_source(xru::Point3D origin, const int spectrum);
+        ~PointSource() = default;
+        static PointSource* create_source(const xru::Point3D& origin, const int spectrum);
         Photon* generate_particle() const override;
     };
 
     class FiniteSource : public Source
     {
         private:
-        FiniteSource(xru::Point3D origin, xru::Vector3D normal_, xru::Vector3D local_y, float dx, float dy, const int spectrum);
+        FiniteSource(const xru::Point3D& origin, const xru::Vector3D& normal_, const xru::Vector3D& local_y, const float dx, const float dy, const int spectrum);
 
         public:
-        FiniteSource* create_source(xru::Point3D origin, xru::Vector3D normal_, xru::Vector3D local_y, float dx, float dy, const int spectrum);
+        ~FiniteSource() = default;
+        static FiniteSource* create_source(const xru::Point3D& origin, const xru::Vector3D& normal_, const xru::Vector3D& local_y, const float dx, const float dy, const int spectrum);
         Photon* generate_particle() const override;
 
         xru::Vector3D normal_, local_y_;

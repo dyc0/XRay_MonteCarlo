@@ -3,7 +3,9 @@
 
 namespace xrc {
 
-	const static double tolerance = 1e-6;
+	const static double tolerance = 1e-12;
+
+	const static double PI = 3.14159265358979323846;
 
 	// Possible energies of photons
 	static const std::vector<double> energies = {

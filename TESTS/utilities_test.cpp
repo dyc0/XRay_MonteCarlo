@@ -1,5 +1,4 @@
 #include "XRaySimulator.hpp"
-#include <iostream>
 
 using namespace xru;
 
@@ -55,6 +54,74 @@ int main(int argc, const char* argv[])
     d.norm();
     std::cout << "normed d = " << d << std::endl;
     if (abs(Vector3D::abs(d) - 1) > tolerance) return 2;
+    std::cout << std::endl;
+
+    // RETURNS 4
+    std::cout << "\n\t-------------------------\n\tCHECKING RANDOM GENERATOR\n\t-------------------------\n\n";
+    
+    std::cout << "Initializing RNG." << std::endl << std::endl;
+    auto rng = RandomGenerator::initialize_random_generator();
+    
+    double rnd_num;
+    int num_cols = 10;
+    
+    std::cout << "Generating 100 random scalars:" << std::endl;
+    for (int i = 1; i<101; i++)
+    {
+        rnd_num = RandomGenerator::random_scalar();
+        if (rnd_num < -1 || rnd_num > 1) return 4;
+        std::cout << rnd_num << " ";
+        if (i % num_cols == 0) std::cout << std::endl;
+    }
+    std::cout<<std::endl;
+    
+    std::cout << "Generating 100 random positives:" << std::endl;
+    for (int i = 1; i<101; i++)
+    {
+        rnd_num = RandomGenerator::random_positive();
+        if (rnd_num < 0 || rnd_num > 1) return 4;
+        std::cout << rnd_num << " ";
+        if (i % num_cols == 0) std::cout << std::endl;
+    }
+    std::cout<<std::endl;
+    
+    std::cout << "Generating 100 randoms in range (-5,5):" << std::endl;
+    for (int i = 1; i<101; i++)
+    {
+        rnd_num = RandomGenerator::random_range(-5, 5);
+        if (rnd_num < -5 || rnd_num > 5) return 4;
+        std::cout << rnd_num << " ";
+        if (i % num_cols == 0) std::cout << std::endl;
+    }
+    std::cout<<std::endl;
+    
+    std::cout << "Generating 100 randoms in range (10,20):" << std::endl;
+    for (int i = 1; i<101; i++)
+    {
+        rnd_num = RandomGenerator::random_range(10, 20);
+        if (rnd_num < 10 || rnd_num > 20) return 4;
+        std::cout << rnd_num << " ";
+        if (i % num_cols == 0) std::cout << std::endl;
+    }
+    std::cout<<std::endl;
+
+    delete rng;
+
+    // RETURNS 5
+    std::cout << "\n\t----------------------\n\tCHECKING INDEX FINDING\n\t----------------------\n\n";
+    int index;
+    index = index_finder(52.3, xrc::energies);
+    std::cout << "Index for energy value 52.3 is " << index << "." << std::endl;
+    if (index != 93) return 5;
+    index = index_finder(6.1, xrc::energies);
+    std::cout << "Index for energy value 6.1 is " << index << "." << std::endl;
+    if (index != 1) return 5;
+    index = index_finder(4.1, xrc::energies);
+    std::cout << "Index for energy value 4.1 is " << index << "." << std::endl;
+    if (index != 0) return 5;
+    index = index_finder(500, xrc::energies);
+    std::cout << "Index for energy value 500 is " << index << "." << std::endl;
+    if (index != -1) return 5;
     std::cout << std::endl;
 
     return 0;

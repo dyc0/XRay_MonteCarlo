@@ -1,9 +1,9 @@
 add_library(XRaySimulator STATIC)
 
 list(APPEND XRLIB_SOURCES
-     ${CMAKE_CURRENT_SOURCE_DIR}/src/geometry.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/src/photons.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/src/utilities.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/photons.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/geometry.cpp
     )
 
 list(APPEND XRLIB_INCLUDES

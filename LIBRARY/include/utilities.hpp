@@ -12,6 +12,8 @@ namespace xru
         Vector3D(const double x, const double y, const double z);
         Vector3D(const Vector3D& other);
 
+        ~Vector3D() = default;
+
         Vector3D cross(const Vector3D &other) const;
         double dot(const Vector3D &other) const;
         double euclidian_distance(const Vector3D &other) const;
@@ -37,6 +39,8 @@ namespace xru
 
     ///< Second order equation coefficients, as in: <x * x + 2*phalf * x + q = 0>
     struct QuadraticCoef {
+        ~QuadraticCoef() = default;
+
         double phalf{0}; // we don't need p itself when solving the equation, hence we store just p/2
         double q{0};     // we do need q
     };
@@ -48,8 +52,11 @@ namespace xru
 
 
     struct RandomGenerator {
-        static void initialize_random_generator();
+        public:
+        static RandomGenerator* initialize_random_generator();
+        ~RandomGenerator();
 
+        // CHECK: Can we do inline static?
         static double random_scalar();
         static double random_positive();
         static double random_range(const double min, const double max);
@@ -58,8 +65,8 @@ namespace xru
         
         private:
         RandomGenerator();
-        static bool is_initialized;
-    }
+        static RandomGenerator* instance_;
+    };
 
 }
 
