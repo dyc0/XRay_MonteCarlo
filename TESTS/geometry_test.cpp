@@ -2,7 +2,7 @@
 
 using namespace xrg;
 
-void test_intersect(xrt::Photon* ray, Body* body, int exp_numroots, double* expected_roots)
+void test_intersect(xrp::Photon* ray, Body* body, int exp_numroots, double* expected_roots)
 {
     double intersections[2] = {0, 0};
     int numint = 0;
@@ -24,16 +24,16 @@ int main(int argc, const char* argv[])
 {
     try
     {
-       Body* sph = new Sphere(1, 2, 0, 0);
+        Body* sph = new Sphere(1, 2, 0, 0);
         Body* sph_behind = new Sphere(1, -2, 0, 0);
         Body* ell = new Ellipsoid(2.5,2,2, 4.5,0,0);
         Body* ell_behind = new Ellipsoid(2.5,2,2, -4.5,0,0);
 
         xru::Point3D o = xru::Point3D(0, 0, 0);
         xru::Vector3D d = xru::Vector3D(1, 0, 0);
+        double e = 1;
         d.norm();
-        xrt::Photon* xrx = new xrt::Photon(d);
-        xrt::Photon::set_source(o);
+        xrp::Photon* xrx = new xrp::Photon(o, d, e, 0, 0);
 
         Body* bodies[] = {sph, sph_behind, ell, ell_behind};
         int exp_numroots[] = {2, 0, 2, 0};
@@ -47,15 +47,16 @@ int main(int argc, const char* argv[])
             test_intersect(xrx, bodies[i], exp_numroots[i], exp_roots[i]);
         std::cout << std::endl;
 
-        Body* cyl = new Cylinder(1,2, 2,0,0);
-        Body* cyl_z = new Cylinder(1,2, 0,0,2);
-        Body* cyl_behind = new Cylinder(1,2, 0,0,-2);
-        xrt::Photon* xrz = new xrt::Photon(xru::Vector3D(0,0,1));
-
-        double exp_roots_cyl[2];
 
         std::cout << std::endl;
         std::cout << "\n\t-----------------\n\tTESTING CYLINDERS\n\t-----------------\n\n";
+
+        Body* cyl = new Cylinder(1,2, 2,0,0);
+        Body* cyl_z = new Cylinder(1,2, 0,0,2);
+        Body* cyl_behind = new Cylinder(1,2, 0,0,-2);
+        xrp::Photon* xrz = new xrp::Photon(o, xru::Vector3D(0,0,1), e, 0, 0);
+
+        double exp_roots_cyl[2];
         
         std::cout << "----Using ray: " << xrx->direction_ << "----" << std::endl;
         exp_roots_cyl[0] = 1;
@@ -73,11 +74,43 @@ int main(int argc, const char* argv[])
         test_intersect(xrz, cyl_behind, 0, exp_roots_cyl);
         std::cout << std::endl;
 
-        xrt::Photon* xr_angle = new xrt::Photon(xru::Vector3D(0.5, 0, 1));
+        xrp::Photon* xr_angle = new xrp::Photon(o, xru::Vector3D(0.5, 0, 1).normed(), e, 0, 0);
         std::cout << "----Using ray: " << xr_angle->direction_ << "----" << std::endl;
-        exp_roots_cyl[0] = 1;
-        exp_roots_cyl[1] = 2;
+        exp_roots_cyl[0] = sqrt(1.25);
+        exp_roots_cyl[1] = sqrt(5);
         test_intersect(xr_angle, cyl_z, 2, exp_roots_cyl);
+        std::cout << std::endl;
+
+
+        std::cout << std::endl;
+        std::cout << "\n\t--------------\n\tTESTING PLANES\n\t--------------\n\n";
+
+        double exp_roots_plane[2];
+
+        Body* rectangle_yz   = new Rectangle(xru::Vector3D(-1, 0, 0), xru::Vector3D(0, 1, 0), 4, 4,  2, 0, 0);
+        Body* rectangle_yz_f = new Rectangle(xru::Vector3D( 1, 0, 0), xru::Vector3D(0, 1, 0), 4, 2,  2, 0, 0);
+        Body* rectangle_yz_b = new Rectangle(xru::Vector3D( 1, 0, 0), xru::Vector3D(0, 1, 0), 4, 2, -2, 0, 0);
+        Body* rectangle_xy   = new Rectangle(xru::Vector3D( 0, 0, 1), xru::Vector3D(0, 1, 0), 1, 1,  3, 0, 0);
+
+        std::cout << "----Using ray: " << xrx->direction_ << "----" << std::endl;
+        exp_roots_plane[0] = 0;
+        exp_roots_plane[1] = 0;
+        test_intersect(xrx, rectangle_yz,   1, exp_roots_plane);
+        test_intersect(xrx, rectangle_yz_f, 1, exp_roots_plane);
+        test_intersect(xrx, rectangle_yz_b, 0, exp_roots_plane);
+        test_intersect(xrx, rectangle_xy,   0, exp_roots_plane);
+        std::cout << std::endl;
+
+        xrp::Photon* xrp_angle = new xrp::Photon(o, xru::Vector3D(1,1,1).normed(), 1, 0, 0);
+        std::cout << "----Using ray: " << xrp_angle->direction_ << "----" << std::endl;
+        exp_roots_plane[0] = 2;
+        exp_roots_plane[1] = 2;
+        test_intersect(xrp_angle, rectangle_yz, 1, exp_roots_plane);
+        std::cout << std::endl;
+
+        xrp::Photon* xrp_angle_o = new xrp::Photon(o, xru::Vector3D(1,10,10).normed(), 1, 0, 0);
+        std::cout << "----Using ray: " << xrp_angle->direction_ << "----" << std::endl;
+        test_intersect(xrp_angle_o, rectangle_yz, 0, exp_roots_plane);
         std::cout << std::endl;
 
         return 0;

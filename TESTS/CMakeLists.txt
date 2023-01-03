@@ -1,7 +1,7 @@
 # Adding test executables.
 list(APPEND tests
      utilities_test.cpp
-     #geometry_test.cpp
+     geometry_test.cpp
      photons_test.cpp
     )
 

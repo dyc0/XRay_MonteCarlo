@@ -20,5 +20,6 @@
 #include "utilities.hpp"
 #include "photons.hpp"
 #include "geometry.hpp"
+#include "scene.hpp"
 
 #endif
