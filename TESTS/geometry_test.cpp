@@ -81,6 +81,8 @@ int main(int argc, const char* argv[])
         test_intersect(xr_angle, cyl_z, 2, exp_roots_cyl);
         std::cout << std::endl;
 
+        /*
+        DEPRECATED, as rectangles moved to be a part of detector class. But this worked.
 
         std::cout << std::endl;
         std::cout << "\n\t--------------\n\tTESTING PLANES\n\t--------------\n\n";
@@ -112,6 +114,7 @@ int main(int argc, const char* argv[])
         std::cout << "----Using ray: " << xrp_angle->direction_ << "----" << std::endl;
         test_intersect(xrp_angle_o, rectangle_yz, 0, exp_roots_plane);
         std::cout << std::endl;
+        */
 
         return 0;
     }

@@ -2,8 +2,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 if __name__ == '__main__':
-    result = np.loadtxt("results.txt")
-
+    result = np.loadtxt("RESULTS.txt")
+    print(np.max(result))
 
 
     plt.imshow(result, cmap='gray')

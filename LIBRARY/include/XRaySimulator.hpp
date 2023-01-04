@@ -20,6 +20,7 @@
 #include "utilities.hpp"
 #include "photons.hpp"
 #include "geometry.hpp"
+#include "detector.hpp"
 #include "scene.hpp"
 
 #endif

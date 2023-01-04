@@ -6,7 +6,7 @@ namespace xrg
 
     unsigned int Body::body_count = 0;
 
-    Body::Body(const double x, const double y, const double z, int material): centre_(x, y, z), material_(material), dose_(0)
+    Body::Body(const double x, const double y, const double z, int material): centre_(x, y, z), material_(material), absorbed_energy_(0)
     {
         body_index = body_count++;
     };
@@ -14,6 +14,12 @@ namespace xrg
     xru::QuadraticCoef *xrg::Body::intersect_coefs(const xrp::Photon &photon) const
     {
         return nullptr;
+    }
+
+    double Body::calculate_dose() const
+    {
+        if (material_ == xrc::VACUUM) return 0;
+        return absorbed_energy_ / (volume() * xrc::material_densities[material_]);
     }
 
     void xrg::Body::print(std::ostream &where) const
@@ -26,9 +32,9 @@ namespace xrg
         material_ = material;
     }
 
-    void Body::absorb_dose(const double energy)
+    void Body::absorb_energy(const double energy)
     {
-        return;
+        absorbed_energy_ += energy;
     }
 
     Ellipsoid::Ellipsoid(const double a, const double b, const double c, const double x, const double y, const double z) : a_(a), b_(b), c_(c), Body(x, y, z)
@@ -43,6 +49,7 @@ namespace xrg
     {
         xru::QuadraticCoef* qc = intersect_coefs(photon);
         xru::QuadraticSolver(*qc, intersections, numintersections);
+        delete qc;
     }
 
     xru::QuadraticCoef *Ellipsoid::intersect_coefs(const xrp::Photon &photon) const
@@ -64,6 +71,11 @@ namespace xrg
         return qc;
     }
 
+    double Ellipsoid::volume() const
+    {
+        return 4/3 * a_ * b_ * c_ * xrc::PI;
+    }
+
     void xrg::Ellipsoid::print(std::ostream &where) const
     {
         where << "Ellipsoid " << body_index << " at " << centre_ << " with half-axes " << a_ << ", " << b_ << " and " << c_
@@ -77,6 +89,7 @@ namespace xrg
     {
         xru::QuadraticCoef* qc = intersect_coefs(photon);
         xru::QuadraticSolver(*qc, intersections, numintersections);
+        delete qc;
     }
 
     xru::QuadraticCoef *Sphere::intersect_coefs(const xrp::Photon &photon) const
@@ -89,6 +102,11 @@ namespace xrg
         qc->phalf = photon.direction_.dot(delta);
 
         return qc;
+    }
+
+    double Sphere::volume() const
+    {
+        return 4/3 * r_ * r_ * r_ * xrc::PI;
     }
 
     void xrg::Sphere::print(std::ostream &where) const
@@ -129,6 +147,8 @@ namespace xrg
             intersections[1] = intersections[0] - intersections[1];
             intersections[0] = intersections[0] - intersections[1];
         }
+
+        delete qc;
     }
 
     xru::QuadraticCoef *Cylinder::intersect_coefs(const xrp::Photon &photon) const
@@ -166,6 +186,11 @@ namespace xrg
         return false;
     }
 
+    double Cylinder::volume() const
+    {
+        return r_ * r_ * xrc::PI * h_;
+    }
+
     void xrg::Cylinder::print(std::ostream &where) const
     {
         where << "Cylinder " << body_index << " at " << centre_ << " with radius " << r_ << " and height " << h_
@@ -176,50 +201,6 @@ namespace xrg
     {
         o.print(out);
         return out;
-    }
-
-    Rectangle::Rectangle(const xru::Vector3D normal, const xru::Vector3D local_y, const double dx, const double dy, const double x, const double y, const double z):
-        Body(x, y, z), dx_(dx), dy_(dy), normal_(normal), local_y_(local_y)
-        {
-            normal_.norm();
-            local_y_.norm();
-        }
-
-    void Rectangle::intersect(const xrp::Photon &photon, double *local_intersections, int &numintersections) const
-    {
-        // CHECK: This code might be mightly inefficient.
-
-        numintersections = 0;
-
-        // First check plane intersection - the normal should be directed to origin
-        if (photon.direction_.dot(centre_) < xrc::tolerance) [[likely]]     // -> likely because this is used in photon generation
-            return;
-        // Check if it's parallel
-        if (abs(photon.direction_.dot(normal_)) < xrc::tolerance) [[unlikely]]
-            return;
-
-        double t = (centre_ - photon.origin_).dot(normal_) / photon.direction_.dot(normal_);
-        // Check if it's behind
-        if (t < xrc::tolerance) return;
-
-        // Get local coordinates
-        xru::Vector3D local_vec = photon.origin_ + photon.direction_ * t - centre_;
-        local_intersections[0] = local_vec.dot(local_y_.cross(normal_));
-        local_intersections[1] = local_vec.dot(local_y_);
-
-        numintersections += (  local_intersections[0] < dx_ - xrc::tolerance && local_intersections[0] > -dx_ + xrc::tolerance
-                            && local_intersections[1] < dy_ - xrc::tolerance && local_intersections[1] > -dy_ + xrc::tolerance );
-    }
-
-    void Rectangle::print(std::ostream & where) const
-    {
-        where << "Rectangle " << body_index << " at " << centre_ << " with half-dimensions (" << dx_ << ", " << dy_ << ") "
-              << " facing to " << normal_ << " with local y-axis " << local_y_ << " and material " << material_;
-    }
-
-    xru::QuadraticCoef *Rectangle::intersect_coefs(const xrp::Photon &photon) const
-    {
-        return nullptr;
     }
 
 }

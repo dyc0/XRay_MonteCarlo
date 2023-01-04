@@ -5,6 +5,7 @@ list(APPEND XRLIB_SOURCES
      ${CMAKE_CURRENT_SOURCE_DIR}/src/photons.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/src/geometry.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/src/scene.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/detector.cpp
     )
 
 list(APPEND XRLIB_INCLUDES

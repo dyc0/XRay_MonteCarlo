@@ -3,6 +3,8 @@ list(APPEND tests
      utilities_test.cpp
      geometry_test.cpp
      photons_test.cpp
+     scene_test.cpp
+     scene_test_2.cpp
     )
 
 # Enabling testing.
