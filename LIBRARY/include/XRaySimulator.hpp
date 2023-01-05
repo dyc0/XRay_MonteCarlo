@@ -15,6 +15,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <immintrin.h>
 //#include <omp.h>
 
 #include "constants.hpp"

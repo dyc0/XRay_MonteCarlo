@@ -11,12 +11,29 @@ namespace xru {
 
     Vector3D Vector3D::cross(const Vector3D &other) const
     {
-        return Vector3D(dy*other.dz - dz*other.dy, dz*other.dx - dx*other.dz, dx*other.dy - dy*other.dx);
+        __m256d firsts = _mm256_set_pd(dy, dz, dz, dx);
+        __m256d seconds = _mm256_set_pd(other.dz, other.dy, other.dx, other.dz);
+        __m256d mult_result = _mm256_mul_pd(firsts, seconds);
+
+        __m256d firsts2 = _mm256_set_pd(dx, dy, 0, 0);
+        __m256d seconds2 = _mm256_set_pd(other.dy, other.dx, 0, 0);
+        __m256d mult_result2 = _mm256_mul_pd(firsts2, seconds2);
+
+        double* result = (double*) &mult_result;
+        double* result2 = (double*) &mult_result2;
+
+        // __m256d registers INVERSE ORDER OF PARAMETERS!!!
+        return Vector3D(result[3] - result[2], result[1] - result[0], result2[3] - result2[2]);
     }
 
     double Vector3D::dot(const Vector3D &other) const
     {
-        return dx*other.dx + dy*other.dy + dz*other.dz;
+        __m256d firsts = _mm256_set_pd(dx, dy, dz, 0);
+        __m256d seconds = _mm256_set_pd(other.dx, other.dy, other.dz, 0);
+        __m256d mult_result = _mm256_mul_pd(firsts, seconds);
+        double* result = (double*) &mult_result;
+
+        return result[3] + result[2] + result[1];
     }
 
     double Vector3D::euclidian_distance(const Vector3D &other) const
@@ -26,17 +43,32 @@ namespace xru {
 
     Vector3D Vector3D::operator + (Vector3D const &other) const
     {
-        return Vector3D(dx+other.dx, dy+other.dy, dz+other.dz); 
+        __m256d firsts = _mm256_set_pd(dx, dy, dz, 0);
+        __m256d seconds = _mm256_set_pd(other.dx, other.dy, other.dz, 0);
+        __m256d add_result = _mm256_add_pd(firsts, seconds);
+        double* result = (double*) &add_result;
+
+        return Vector3D(result[3], result[2], result[1]); 
     }
 
     Vector3D Vector3D::operator - (Vector3D const &other) const
     {
-        return Vector3D(dx-other.dx, dy-other.dy, dz-other.dz); 
+        __m256d firsts = _mm256_set_pd(dx, dy, dz, 0);
+        __m256d seconds = _mm256_set_pd(other.dx, other.dy, other.dz, 0);
+        __m256d sub_result = _mm256_sub_pd(firsts, seconds);
+        double* result = (double*) &sub_result;
+
+        return Vector3D(result[3], result[2], result[1]); 
     }
 
     Vector3D Vector3D::operator * (double const & scalar) const
     {
-        return Vector3D(dx*scalar, dy*scalar, dz*scalar);
+        __m256d firsts = _mm256_set_pd(dx, dy, dz, 0);
+        __m256d seconds = _mm256_set_pd(scalar, scalar, scalar, 0);
+        __m256d mul_result = _mm256_mul_pd(firsts, seconds);
+        double* result = (double*) &mul_result;
+
+        return Vector3D(result[3], result[2], result[1]);
     }
 
     Vector3D Vector3D::operator / (double const & scalar) const
@@ -49,7 +81,7 @@ namespace xru {
         double A = Vector3D::abs(*this);
         if (A <= 0) return Vector3D();
         A = 1/A;
-        return Vector3D(dx * A, dy * A, dz * A);
+        return *this * A;
     }
 
     void Vector3D::norm()

@@ -50,19 +50,45 @@ namespace xrg
 
     xru::QuadraticCoef *Ellipsoid::intersect_coefs(const xrp::Photon &photon) const
     {
+        __m256d mm_ph_dir, firsts, seconds, coefs, coefs2, result1, result2, subresult;
+        double* result;
+
+        mm_ph_dir = _mm256_set_pd(photon.direction_.dx, photon.direction_.dy, photon.direction_.dz, 0);
+        coefs = _mm256_set_pd(a_, b_, c_, 0);
+        result1 = _mm256_div_pd(mm_ph_dir, coefs);
+        result2 = _mm256_mul_pd(result1, result1);
+        result = (double*) &result2;
+
         // Assuming this is non-zero:
-        auto divider = 1 / ((photon.direction_.dz/c_)*(photon.direction_.dz/c_) +
-                            (photon.direction_.dy/b_)*(photon.direction_.dy/b_) +
-                            (photon.direction_.dx/a_)*(photon.direction_.dx/a_));
+        auto divider = 1 / (result2[3] + result2[2] + result2[1]);
 
         xru::QuadraticCoef* qc = new xru::QuadraticCoef();
-        qc->q = ( (photon.origin_.dz - centre_.dz)*(photon.origin_.dz - centre_.dz) / (c_*c_) +
-                (photon.origin_.dy - centre_.dy)*(photon.origin_.dy - centre_.dy) / (b_*b_) +
-                (photon.origin_.dx - centre_.dx)*(photon.origin_.dx - centre_.dx) / (a_*a_) -
-                1 )* divider;
-        qc->phalf = ( ((photon.origin_.dz-centre_.dz)*photon.direction_.dz/(c_*c_)) +
-                    ((photon.origin_.dy-centre_.dy)*photon.direction_.dy/(b_*b_)) +
-                    ((photon.origin_.dx-centre_.dx)*photon.direction_.dx/(a_*a_)) ) * divider;
+        firsts = _mm256_set_pd(photon.origin_.dx, photon.origin_.dy, photon.origin_.dz, 0);
+        seconds = _mm256_set_pd(centre_.dx, centre_.dy, centre_.dz, 0);
+        // photon.origin_.dx - centre_.dx, photon.origin_.dy - centre_.dy, photon.origin_.dz - centre_.dz
+        subresult = _mm256_sub_pd(firsts, seconds);
+        // (photon.origin_.dx - centre_.dx)*(photon.origin_.dx - centre_.dx),
+        // (photon.origin_.dy - centre_.dy)*(photon.origin_.dy - centre_.dy),
+        // (photon.origin_.dz - centre_.dz)*(photon.origin_.dz - centre_.dz)
+        result1 = _mm256_mul_pd(subresult, subresult);
+        // a_*a_, b_*b_, c_*c_
+        coefs2 = _mm256_mul_pd(coefs, coefs);
+        //(photon.origin_.dz - centre_.dz)*(photon.origin_.dz - centre_.dz) / (c_*c_),
+        //(photon.origin_.dy - centre_.dy)*(photon.origin_.dy - centre_.dy) / (b_*b_),
+        //(photon.origin_.dx - centre_.dx)*(photon.origin_.dx - centre_.dx) / (a_*a_)
+        result2 = _mm256_div_pd(result1, coefs2);
+        result = (double*) &result2;
+
+        qc->q = ( result[3] + result[2] + result[1] - 1 )* divider;
+
+        result1 = _mm256_mul_pd(subresult, mm_ph_dir);
+        // ((photon.origin_.dz-centre_.dz)*photon.direction_.dz/(c_*c_)),
+        // ((photon.origin_.dy-centre_.dy)*photon.direction_.dy/(b_*b_)),
+        // ((photon.origin_.dx-centre_.dx)*photon.direction_.dx/(a_*a_))
+        result2 = _mm256_div_pd(result1, coefs2);
+        result = (double*) &result2;
+
+        qc->phalf = ( result[3] + result[2] + result[1] ) * divider;
 
         return qc;
     }
