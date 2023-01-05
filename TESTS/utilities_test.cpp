@@ -2,7 +2,7 @@
 
 using namespace xru;
 
-int main(int argc, const char* argv[])
+int main()
 {   
     const double tolerance = 0.0000001;
     std::cout << "\n\t-------\n\tTESTING\n\t-------\n" << std::endl;

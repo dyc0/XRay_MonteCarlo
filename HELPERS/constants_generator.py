@@ -1,5 +1,6 @@
 from material_generator import read_attenuation
 from spectra_converter import read_spectrum
+from efficiency_generator import load_csv_data
 
 from matplotlib import pyplot as plt
 import numpy as np
@@ -50,6 +51,7 @@ if __name__ == '__main__':
     tube_flt = "1Al"
     spectrum_path = "spectra"
     materials_path = "materials_data/attenuations"
+    efficiencies_path = "efficiency_data/compound_data"
     tolerance = "1e-6"
     output_file = "../LIBRARY/include/constants.hpp"
 
@@ -62,11 +64,22 @@ if __name__ == '__main__':
         mat_attenuation_interp = np.interp(energies_MeV, mat_energies, mat_attenuation)
         materials[filename[:-4]] = mat_attenuation_interp
 
+    det_effs = {}
+    for filename in os.listdir(efficiencies_path):
+        det_eff = load_csv_data(os.path.join(efficiencies_path, filename))
+        det_eff_interp = np.interp(energies, det_eff[0], det_eff[1])
+        det_effs[filename[:-4]] = det_eff_interp
+
+    
+
     with open(output_file, 'w') as of:
         of.write("#ifndef CONSTANTS_HPP\n#define CONSTANTS_HPP\n\nnamespace xrc {\n\n")
 
         tolerance_string = "\tconst static double tolerance = " + tolerance + ";\n\n"
         of.write(tolerance_string)
+
+        pi_string = "\tconst static double PI = 3.14159265358979323846;\n\n"
+        of.write(pi_string)
 
         source_e = get_list(energies, "energies", "double", "Possible energies of photons")
         of.write(source_e)
@@ -129,10 +142,29 @@ if __name__ == '__main__':
         densities = [1.050, 9.500e-01, 1.050, 1.040, 1.070, 1.040, 1.920, 1.060, 1.050, 1.020, 1]
         densities_str = get_list(densities, "material_densities", "double", "Densities of materials")
         of.write("\n" + densities_str)
+        of.write("\n\n")
+
+        effs_pointers = []
+        effs_enum = "enum efficiencies { "
+        for key in det_effs.keys():
+            effs_pointers.append("&" + "coat_" + key)
+            efficiency = get_list(det_effs[key], "coat_" + key, "double", key + " efficiency")
+            of.write(efficiency)
+            of.write("\n")
+
+            effs_enum += key.upper() + ", "
+        effs_enum = effs_enum[:-2]
+        effs_enum += " };"
+
+        keys = get_map(np.arange(0, len(det_effs.keys())), effs_pointers, "efficiency_keys", "int", "const std::vector<double>*", "Map of all detector coating efficiencies")
+        of.write(keys)
+        of.write("\n\n")
 
         of.write("\n\t" + spectra_enum + "\n")
 
         of.write("\n\t" + materials_enum + "\n")
+
+        of.write("\n\t" + effs_enum + "\n")
         of.write("\n")
 
 

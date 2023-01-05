@@ -15,12 +15,12 @@ void test_intersect(xrp::Photon* ray, Body* body, int exp_numroots, double* expe
     else
         switch (numint)
         {
-            case 2: if (abs(intersections[1] - expected_roots[1]) > xrc::tolerance) throw -2;
+            case 2: if (abs(intersections[1] - expected_roots[1]) > xrc::tolerance) throw -2; [[fallhrough]]
             case 1: if (abs(intersections[0] - expected_roots[0]) > xrc::tolerance) throw -3;
         }
 }
 
-int main(int argc, const char* argv[])
+int main()
 {
     try
     {

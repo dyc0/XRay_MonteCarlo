@@ -6,6 +6,7 @@ int main()
     xrd::Detector* d = new xrd::Detector(xru::Vector3D(0, 7, 0), xru::Vector3D(0, -1, 0), xru::Vector3D(0, 0, 1), 380, 380, 0.1, 0.1);
 
     xrs::Scene* scene = new xrs::Scene(s, d);
+    scene->detector_->add_coating(0.01, xrc::SE);
 
     xrg::Body* ellipsoid = new xrg::Ellipsoid(30, 6, 30, 0, 0, 0);
     ellipsoid->set_material(xrc::materials::WATER);
@@ -27,16 +28,8 @@ int main()
     cyl->set_material(xrc::materials::LUNG);
     scene->add_body(cyl);
 
-    scene->shoot_photons(1e3);
+    scene->shoot_photons(1e6);
 
-    //for (auto row: scene->detector_->m_)
-    //{
-    //    for (auto px: row)
-    //    {
-    //        std::cout << px->photons << " ";
-    //    }
-    //    std::cout << std::endl;
-    //}
     for (auto body: scene->bodies_)
         std::cout << *body << " received the dose of " << body->calculate_dose() << " Gy." << std::endl;
 

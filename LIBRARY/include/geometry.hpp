@@ -3,10 +3,11 @@
 
 namespace xrg {
 
-    class Body {
+    class Body 
+    {
         public:
         Body(const double x, const double y, const double z, int material = xrc::materials::VACUUM);
-        ~Body() = default;
+        virtual ~Body() = default;
 
         virtual void intersect(const xrp::Photon &photon, double* intersections, int& numintersections) const = 0;
         virtual xru::QuadraticCoef* intersect_coefs(const xrp::Photon &photon) const = 0;
@@ -19,18 +20,18 @@ namespace xrg {
         void set_material(const int material);
         void absorb_energy(const double energy);
 
+        xru::Point3D centre_;
+
         int material_;
         double absorbed_energy_;
         unsigned int body_index;
         static unsigned int body_count;
-
-        protected:
-        xru::Point3D centre_;
     };
 
     std::ostream& operator<<(std::ostream& out, const Body& o);
 
-    class Ellipsoid: public Body {
+    class Ellipsoid: public Body 
+    {
         public:
         Ellipsoid(const double a, const double b, const double c, const double x, const double y, const double z);
         ~Ellipsoid() = default;
@@ -46,7 +47,8 @@ namespace xrg {
         double a_, b_, c_;
     };
 
-    class Sphere: public Body {
+    class Sphere: public Body 
+    {
         public:
         Sphere(const double r, const double x, const double y, const double z);
         ~Sphere() = default;
@@ -62,7 +64,8 @@ namespace xrg {
         double r_;
     };
 
-    class Cylinder: public Body {
+    class Cylinder: public Body 
+    {
         public:
         Cylinder(const double r, const double h, const double x, const double y, const double z);
         ~Cylinder() = default;

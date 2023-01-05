@@ -3,7 +3,7 @@
 
 xrd::Detector::Detector(const xru::Point3D &centre, const xru::Vector3D &normal, const xru::Vector3D local_y,
                         const size_t npx_x, const size_t npx_y, const double dx, const double dy):
-    centre_(centre), normal_(normal), local_y_(local_y), npx_x_(npx_x), npx_y_(npx_y), dx_(dx), dy_(dy), xd_(1./dx), yd_(1./dy)
+    centre_(centre), normal_(normal), local_y_(local_y), npx_x_(npx_x), npx_y_(npx_y), dx_(dx), dy_(dy), xd_(1./dx), yd_(1./dy), coating_material_(nullptr)
 {
     normal_.norm();
     local_y_.norm();
@@ -56,14 +56,30 @@ void xrd::Detector::check_hit(const xrp::Photon &photon, size_t *intersection_in
 
     if (hit)
     {
-        assert(intersection_index[0] >= 0 && intersection_index[0] < npx_y_);
-        assert(intersection_index[1] >= 0 && intersection_index[1] < npx_x_);
+        assert(intersection_index[0] < npx_y_);
+        assert(intersection_index[1] < npx_x_);
     }
 }
 
 void xrd::Detector::increment_pixel(const size_t x, const size_t y)
 {
     m_[y][x]->photons++;
+}
+
+void xrd::Detector::add_coating(const double width, const int material)
+{
+    coating_layer_ = normal_* (-width);
+    coating_material_ = xrc::efficiency_keys.at(material);
+}
+
+bool xrd::Detector::coating_hit(const xrp::Photon *photon, const double running_sum, const double treshold)
+{
+    if (coating_material_ == nullptr) return true;
+
+    double attenuation_coef = photon->lerp_percentage_ * coating_material_->at(photon->lerp_energy_index_) +
+                             (1 - photon->lerp_percentage_) * coating_material_->at(photon->lerp_energy_index_ - 1);
+
+    return (attenuation_coef * coating_layer_.dot(coating_layer_) / (coating_layer_.dot(photon->direction_) + running_sum) < treshold);
 }
 
 void xrd::Detector::save_to_file(const std::string &path) const
@@ -73,10 +89,10 @@ void xrd::Detector::save_to_file(const std::string &path) const
     catch (...) { std::cerr << "Error opening file " << path << "." << std::endl; }
 
     std::string row_data;
-    for (int row = 0; row < npx_y_; row++)
+    for (size_t row = 0; row < npx_y_; row++)
     {   
         row_data = "";
-        for (int column = 0; column < npx_x_; column++)
+        for (size_t column = 0; column < npx_x_; column++)
             row_data.append(std::to_string(m_[row][column]->photons)).append(" ");
         row_data.pop_back();
         output_file << row_data << std::endl;

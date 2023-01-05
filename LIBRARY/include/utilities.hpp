@@ -22,6 +22,7 @@ namespace xru
         Vector3D operator - (Vector3D const &other) const;
         Vector3D operator * (double const & scalar) const;
         Vector3D operator / (double const & scalar) const;
+        Vector3D& operator = (const Vector3D& other) = default;
 
         Vector3D normed() const;
         void norm();

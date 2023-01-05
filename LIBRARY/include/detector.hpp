@@ -21,6 +21,9 @@ namespace xrd
         void check_hit(const xrp::Photon& photon, size_t* intersection_index, bool& hit);
         void increment_pixel(const size_t x, const size_t y);
 
+        void add_coating(const double width, const int material);
+        bool coating_hit(const xrp::Photon* photon, const double running_sum, const double treshold);
+
         void save_to_file(const std::string& path) const;
 
         xru::Point3D centre_;
@@ -29,6 +32,9 @@ namespace xrd
         double dx_, dy_;    // Could be that this is not used
         double xd_, yd_;
         double x_span_, y_span_;
+
+        xru::Vector3D coating_layer_;
+        const std::vector<double>* coating_material_;
 
         PixelMatrix m_;
     };

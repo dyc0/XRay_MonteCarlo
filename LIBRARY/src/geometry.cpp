@@ -6,15 +6,11 @@ namespace xrg
 
     unsigned int Body::body_count = 0;
 
-    Body::Body(const double x, const double y, const double z, int material): centre_(x, y, z), material_(material), absorbed_energy_(0)
+    Body::Body(const double x, const double y, const double z, int material):
+        centre_(x, y, z), material_(material), absorbed_energy_(0)
     {
         body_index = body_count++;
     };
-
-    xru::QuadraticCoef *xrg::Body::intersect_coefs(const xrp::Photon &photon) const
-    {
-        return nullptr;
-    }
 
     double Body::calculate_dose() const
     {
@@ -37,7 +33,7 @@ namespace xrg
         absorbed_energy_ += energy;
     }
 
-    Ellipsoid::Ellipsoid(const double a, const double b, const double c, const double x, const double y, const double z) : a_(a), b_(b), c_(c), Body(x, y, z)
+    Ellipsoid::Ellipsoid(const double a, const double b, const double c, const double x, const double y, const double z) : Body(x, y, z), a_(a), b_(b), c_(c)
     {
         // This MUST be an ellipsoid
         assert((a_ != 0));
@@ -83,7 +79,7 @@ namespace xrg
     }
 
     Sphere::Sphere(const double r, const double x, const double y, const double z):
-        r_(r), Body(x, y, z) { };
+        Body(x, y, z), r_(r) { };
 
     void xrg::Sphere::intersect(const xrp::Photon &photon, double *intersections, int& numintersections) const
     {
@@ -115,7 +111,7 @@ namespace xrg
             << " and material " << material_;
     }
 
-    Cylinder::Cylinder(const double r, const double h, const double x, const double y, const double z): Body(x, y, z), h_(h), r_(r) { };
+    Cylinder::Cylinder(const double r, const double h, const double x, const double y, const double z): Body(x, y, z), r_(r), h_(h) { };
 
     void xrg::Cylinder::intersect(const xrp::Photon &photon, double *intersections, int& numintersections) const
     {

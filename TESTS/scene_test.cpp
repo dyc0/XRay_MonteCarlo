@@ -26,8 +26,6 @@ int main()
     Scene* scene = new Scene(s, d);
     
     xrp::Photon* ph = new xrp::Photon(xru::Vector3D(0,0,0), xru::Vector3D(1, 0.5, 0.5), 1, 1, 1);
-    size_t indices[2];
-    bool hit = false;
     size_t exp_indices[2];
 
     try

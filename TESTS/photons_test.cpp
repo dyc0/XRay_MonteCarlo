@@ -2,7 +2,7 @@
 
 using namespace xrp;
 
-int main(int argc, char* argv[])
+int main()
 {
 
     xru::Point3D origin = xru::Point3D();

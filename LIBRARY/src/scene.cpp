@@ -24,12 +24,12 @@ namespace xrs
     {
         xrp::Photon* photon;
 
-        size_t intersection_indices[2];
-        bool hit;
+        size_t intersection_indices[2] = {0, 0};
+        bool hit = false;
 
         std::vector<traversal_info> crossings;
-        double intersections[2];
-        int numintersections;
+        double intersections[2] = {0, 0};
+        int numintersections = 0;
 
         int divider_for_progress = number_of_photons / 100;
 
@@ -73,7 +73,7 @@ namespace xrs
         if (crossings.empty()) return true;
 
         std::sort(crossings.begin(), crossings.end());
-        double threshold = -log(xru::RandomGenerator::random_positive());
+        double treshold = -log(xru::RandomGenerator::random_positive());
         
         double path_length = 0;
         double cumulative_sum = 0;
@@ -99,14 +99,15 @@ namespace xrs
                                (1 - ph->lerp_percentage_) * current_material->at(ph->lerp_energy_index_ - 1);
             cumulative_sum += attenuation_coef * path_length;
 
-            if (cumulative_sum > threshold)
+            if (cumulative_sum > treshold)
             {
                 current_body.top()->absorb_energy(ph->energy_);
                 return false;
             }
         }
 
-        return true;
+        // Lastly, is it absorbed in detector coating?
+        return detector_->coating_hit(ph, cumulative_sum, treshold);
     }
 
 }

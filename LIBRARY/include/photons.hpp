@@ -9,11 +9,11 @@ namespace xrp
         Photon(const xru::Point3D& origin, const xru::Vector3D& direction, const float energy, const int lerp_energy_index, const float lerp_percentage);
         ~Photon() = default;
 
-        float energy_;
-        xru::Vector3D direction_;
         xru::Point3D origin_;
+        xru::Vector3D direction_;
 
         // For lerping:
+        float energy_;
         int lerp_energy_index_;
         float lerp_percentage_;
     };
@@ -30,7 +30,7 @@ namespace xrp
         void generate_energy(int& index, double& lerp_perc, float& energy) const;
 
         public:
-        ~Source();
+        virtual ~Source();
         virtual Photon* generate_particle() const = 0;
 
         const std::vector<double>* spectrum_;

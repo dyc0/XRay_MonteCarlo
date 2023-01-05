@@ -91,7 +91,7 @@ namespace xru {
 
     int index_finder(double element_value, const std::vector<double>& container)
     {
-        for (int i=0; i < container.size(); i++)
+        for (size_t i=0; i < container.size(); i++)
             if (element_value <= container[i]) return i;
         return -1;
     }
