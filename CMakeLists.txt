@@ -9,6 +9,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 option(DEBUGGING "Toggle debugging mode for symbol generation etc." ON)
 option(ENABLE_TESTING "Choose whether to compile test files." ON)
 
+find_package(OpenMP)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+
 if(DEBUGGING)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
@@ -18,16 +21,15 @@ target_compile_features(compiler_flags INTERFACE cxx_std_11)
 
 if(DEBUGGING)
   target_compile_options(compiler_flags INTERFACE
-    -Wall -Wextra -Wshadow -Wformat=2 -Wunused -mavx
+    -Wall -Wextra -Wshadow -Wformat=2 -Wunused -mavx ${OpenMP_CXX_FLAGS}
   )
 else()
   target_compile_options(compiler_flags INTERFACE
-    -O0 -mavx2
+    -O0 -mavx2 ${OpenMP_CXX_FLAGS}
   )
 endif()
 
 get_target_property(CompFl compiler_flags CMAKE_C_FLAGS)
-message(${CompFl})
 
 add_subdirectory(LIBRARY)
 list(APPEND XR_LIBS XRaySimulator)

@@ -16,7 +16,9 @@ namespace xrs
 
     void Scene::add_body(xrg::Body *body)
     {
+        body->set_index(bodies_.size());
         bodies_.push_back(body);
+        absorbed_energies_.push_back(0);
     }
 
 
@@ -31,28 +33,80 @@ namespace xrs
         double intersections[2] = {0, 0};
         int numintersections = 0;
 
-        int divider_for_progress = number_of_photons / 100;
+        int divider_for_progress;
+        double progress = 0;
+        int private_progress;
+        std::vector<double> private_energies;
+        std::vector<std::vector<size_t>> private_pixels;
 
-        for (size_t i = 0; i < number_of_photons;)
+        omp_set_num_threads(12);
+
+        #pragma omp parallel private(photon, intersection_indices, hit, crossings, intersections, numintersections, private_energies, private_pixels, private_progress) shared(divider_for_progress, progress)
         {
-            photon = source_->generate_particle();
-            detector_->check_hit(*photon, intersection_indices, hit);
-
-            if (hit) [[unlikely]]
+            #pragma omp single
             {
-                body_interactions(photon, crossings, intersections, numintersections);
-                hit = check_photon_absorption(photon, crossings);
-                detector_->m_[intersection_indices[0]][intersection_indices[1]]->photons += hit;
-                crossings.clear();
-
-                i++;    // Count only photons that hit detector
-                if (i % divider_for_progress == 0)
-                    std::cout << "\r" << int(100. * i /number_of_photons) << "\%" << std::flush;
+                divider_for_progress =  number_of_photons / 100 / omp_get_num_threads();
+                divider_for_progress += (divider_for_progress == 0)*100;
             }
 
-            delete photon;
+            for (size_t i = 0; i < detector_->npx_y_; i++)
+            {
+                private_pixels.push_back(std::vector<size_t>());
+                for (size_t j = 0; j < detector_->npx_x_; j++)
+                    private_pixels.back().push_back(0);
+            }
+
+            for (auto body: bodies_)
+                private_energies.push_back(0);
+
+            private_progress = 0;
+
+            #pragma omp for 
+            for (size_t i = 0; i < number_of_photons; i++)
+            {
+                photon = new xrp::Photon();
+                hit = false;
+                while(!hit)
+                {
+                    delete photon;
+                    photon = source_->generate_particle();
+                    detector_->check_hit(*photon, intersection_indices, hit);
+                }
+
+
+                body_interactions(photon, crossings, intersections, numintersections);
+                hit = check_photon_absorption(photon, crossings, private_energies);
+                private_pixels[intersection_indices[0]][intersection_indices[1]] += hit;
+                crossings.clear();
+                
+                private_progress++;    // Count only photons that hit detector
+                if (private_progress % divider_for_progress == 0)
+                    #pragma omp critical
+                    {
+                        progress += private_progress;
+                        private_progress = 0;
+                        std::cout << "\r" << int(100 * progress / number_of_photons) << "\%" << std::flush;
+                    }
+
+                delete photon;
+            }
+
+            #pragma omp single
+            std::cout << "\rDONE." << std::endl;
+
+            #pragma omp critical
+            {
+                std::cout << std::endl << "ENERGIES " << omp_get_thread_num() << ":";
+                for (size_t i = 0; i < bodies_.size(); i++)
+                {
+                    bodies_[i]->absorb_energy(private_energies[i]);
+                    std::cout<<private_energies[i] << " ";
+                }
+                for (size_t i = 0; i < detector_->npx_y_; i++)
+                    for (size_t j = 0; j < detector_->npx_x_; j++)
+                        detector_->m_[i][j]->photons += private_pixels[i][j];
+            }
         }
-        std::cout << "\rDONE." << std::endl;
     }
 
     void Scene::body_interactions(const xrp::Photon* ph, std::vector<traversal_info>& crossings, double* intersections, int numintersections)
@@ -68,7 +122,7 @@ namespace xrs
         }
     }
 
-    bool Scene::check_photon_absorption(xrp::Photon* ph, std::vector<traversal_info>& crossings)
+    bool Scene::check_photon_absorption(xrp::Photon* ph, std::vector<traversal_info>& crossings, std::vector<double>& absorbed_energies)
     {
         if (crossings.empty()) return true;
 
@@ -101,7 +155,7 @@ namespace xrs
 
             if (cumulative_sum > treshold)
             {
-                current_body.top()->absorb_energy(ph->energy_);
+                absorbed_energies[current_body.top()->body_index] += ph->energy_;
                 return false;
             }
         }

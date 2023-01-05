@@ -22,7 +22,7 @@ xrd::Detector::Detector(const xru::Point3D &centre, const xru::Vector3D &normal,
 
 xrd::Detector::~Detector()
 {
-    for (auto row:m_)
+    for (auto row: m_)
         for (auto px: row)
             delete px;
 }

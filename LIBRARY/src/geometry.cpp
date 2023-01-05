@@ -4,7 +4,7 @@
 namespace xrg
 {
 
-    unsigned int Body::body_count = 0;
+    size_t Body::body_count = 0;
 
     Body::Body(const double x, const double y, const double z, int material):
         centre_(x, y, z), material_(material), absorbed_energy_(0)
@@ -16,6 +16,11 @@ namespace xrg
     {
         if (material_ == xrc::VACUUM) return 0;
         return absorbed_energy_ / (volume() * xrc::material_densities[material_]);
+    }
+
+    void Body::set_index(size_t index)
+    {
+        body_index = index;
     }
 
     void xrg::Body::print(std::ostream &where) const

@@ -15,6 +15,8 @@ namespace xrg {
         virtual double volume() const = 0;
         double calculate_dose() const;
 
+        void set_index(size_t index);
+
         virtual void print(std::ostream& where) const;
 
         void set_material(const int material);
@@ -24,8 +26,8 @@ namespace xrg {
 
         int material_;
         double absorbed_energy_;
-        unsigned int body_index;
-        static unsigned int body_count;
+        size_t body_index;
+        static size_t body_count;
     };
 
     std::ostream& operator<<(std::ostream& out, const Body& o);

@@ -7,6 +7,7 @@ namespace xrp
     struct Photon
     {
         Photon(const xru::Point3D& origin, const xru::Vector3D& direction, const float energy, const int lerp_energy_index, const float lerp_percentage);
+        Photon() = default;
         ~Photon() = default;
 
         xru::Point3D origin_;
