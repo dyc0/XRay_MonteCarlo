@@ -28,7 +28,7 @@ int main()
     cyl->set_material(xrc::materials::LUNG);
     scene->add_body(cyl);
 
-    scene->shoot_photons(1e4);
+    scene->shoot_photons(1e6);
 
     for (auto body: scene->bodies_)
         std::cout << *body << " received the dose of " << body->calculate_dose() << " Gy." << std::endl;
