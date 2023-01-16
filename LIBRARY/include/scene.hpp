@@ -18,6 +18,8 @@ namespace xrs
         void body_interactions(const xrp::Photon* ph, std::vector<traversal_info>& crossings, double* intersections, int numintersections);
         bool check_photon_absorption(xrp::Photon* ph, std::vector<traversal_info>& crossings);
 
+        void save_absorptions(const std::string& path) const;
+
         xrp::Source* source_;
         xrd::Detector* detector_;
         std::vector<xrg::Body*> bodies_;

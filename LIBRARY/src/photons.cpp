@@ -52,6 +52,11 @@ namespace xrp
         delete rng_;
     }
 
+    void Source::set_spectrum(const unsigned int spectrum)
+    {
+        spectrum_ = xrc::spectra_keys.at(spectrum);
+    }
+
     PointSource::PointSource(const xru::Point3D& origin, const int spectrum): Source(origin, spectrum) {}
 
     PointSource* PointSource::create_source(const xru::Point3D& origin, const int spectrum)

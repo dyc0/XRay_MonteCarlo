@@ -32,6 +32,7 @@ namespace xrp
         public:
         virtual ~Source();
         virtual Photon* generate_particle() const = 0;
+        void set_spectrum(const unsigned int spectrum);
 
         const std::vector<double>* spectrum_;
         xru::Point3D origin_;

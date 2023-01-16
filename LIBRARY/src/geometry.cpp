@@ -15,7 +15,7 @@ namespace xrg
     double Body::calculate_dose() const
     {
         if (material_ == xrc::VACUUM) return 0;
-        return absorbed_energy_ / (volume() * xrc::material_densities[material_]);
+        return absorbed_energy_ / (volume() * xrc::material_densities[material_]) * 1.602176565e-13; //1000(keV) / 0.001(g) * e
     }
 
     void xrg::Body::print(std::ostream &where) const

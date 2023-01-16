@@ -110,4 +110,15 @@ namespace xrs
         return detector_->coating_hit(ph, cumulative_sum, treshold);
     }
 
+    void Scene::save_absorptions(const std::string& path) const
+    {
+        std::ofstream output_file;
+        try { output_file.open(path, std::ios::out); }
+        catch (...) { std::cerr << "Error opening file " << path << "." << std::endl; }
+
+        for (auto body: bodies_)
+            output_file << *body << " received the dose of " << body->calculate_dose() << " Gy." << std::endl;
+
+        output_file.close();
+    }
 }
