@@ -1,0 +1,5 @@
+Ellipsoid 0 at (0, 0, 0) with half-axes 30, 6 and 30 and material 10 received the dose of 2.81214e-09 Gy.
+Sphere 1 at (-12, -1, 5) with radius 2 and material 7 received the dose of 5.23178e-09 Gy.
+Sphere 2 at (-6, 0, -10) with radius 3 and material 8 received the dose of 3.29024e-09 Gy.
+Sphere 3 at (5, 1, 5) with radius 3 and material 6 received the dose of 1.3646e-09 Gy.
+Cylinder 4 at (0, 0, 0) with radius 2 and height 8 and material 2 received the dose of 2.37021e-09 Gy.
